@@ -1,0 +1,41 @@
+---
+- name: Add Users
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Add user and key
+      block:
+        - name: Create new user
+          ansible.builtin.user:
+            name: timych
+            groups: wheel
+            append: true
+            state: present
+            createhome: true
+        # - name: Create .ssh folder
+        #   file:
+        #     path: ~timych/.ssh
+        #     state: directory
+        #     owner: timych
+        #     group: timych
+        #     mode: 0700
+        # - name: Upload SSH key
+        #   copy:
+        #     src: ~timych/.ssh/id_rsa.pub
+        #     dest: ~timych/.ssh/id_rsa.pub
+        #     owner: timych
+        #     group: timych
+        #     mode: 0700
+        - name: Copy key
+          ansible.posix.authorized_key:
+            user: timych
+            state: present
+            key: "{{ lookup('file', '~timych/.ssh/id_rsa.pub') }}"
+        - name: Add NOPASSWD
+          ansible.builtin.lineinfile:
+            path: /etc/sudoers
+            state: present
+            regexp: '^%wheel'
+            line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+            validate: 'visudo -cf %s'

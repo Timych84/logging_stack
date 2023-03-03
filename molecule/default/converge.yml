@@ -1,0 +1,16 @@
+---
+- name: Converge vector
+  hosts: vector
+  tasks:
+    - name: "Include playbook"
+      ansible.builtin.include_role:
+        name: vector-role
+- name: Converge lighthouse
+  hosts: lighthouse
+  tasks:
+    - name: Print the gateway for each host when defined
+      ansible.builtin.debug:
+        var: hostvars['vector']['ansible_default_ipv4']['address']
+    - name: "Include playbook"
+      ansible.builtin.include_role:
+        name: lighthouse-role
